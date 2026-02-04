@@ -314,16 +314,18 @@ def test_blm_control_constraints_lb_ub():
     blm_fit.fit_movers(jdata=jdata)
     # blm_fit.fit_stayers(sdata=sdata)
 
-    assert np.min(blm_fit.S1_cat['cat_tv_control'] ** 2) >= 0.08
-    assert np.min(blm_fit.S2_cat['cat_tv_control'] ** 2) >= 0.08
-    assert np.max(blm_fit.S1_cat['cat_tv_control'] ** 2) <= 0.09
-    assert np.max(blm_fit.S2_cat['cat_tv_control'] ** 2) <= 0.09
+    # Use small epsilon for floating-point comparison (0.3**2 = 0.09000000000000002)
+    eps = 1e-10
+    assert np.min(blm_fit.S1_cat['cat_tv_control'] ** 2) >= 0.08 - eps
+    assert np.min(blm_fit.S2_cat['cat_tv_control'] ** 2) >= 0.08 - eps
+    assert np.max(blm_fit.S1_cat['cat_tv_control'] ** 2) <= 0.09 + eps
+    assert np.max(blm_fit.S2_cat['cat_tv_control'] ** 2) <= 0.09 + eps
 
     # Make sure simulated parameters fall outside range
-    assert np.min(sim_params['S1_cat']['cat_tv_control'] ** 2) <= 0.08
-    assert np.min(sim_params['S2_cat']['cat_tv_control'] ** 2) <= 0.08
-    assert np.max(sim_params['S1_cat']['cat_tv_control'] ** 2) >= 0.09
-    assert np.max(sim_params['S2_cat']['cat_tv_control'] ** 2) >= 0.09
+    assert np.min(sim_params['S1_cat']['cat_tv_control'] ** 2) <= 0.08 + eps
+    assert np.min(sim_params['S2_cat']['cat_tv_control'] ** 2) <= 0.08 + eps
+    assert np.max(sim_params['S1_cat']['cat_tv_control'] ** 2) >= 0.09 - eps
+    assert np.max(sim_params['S2_cat']['cat_tv_control'] ** 2) >= 0.09 - eps
 
 def test_blm_control_normalization():
     # Test whether normalization for categorical control variables works for BLM estimator.

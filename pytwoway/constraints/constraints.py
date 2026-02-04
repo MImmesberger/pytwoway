@@ -14,7 +14,7 @@ NOTE: parameters are ordered with precedence of (time, worker type, firm type). 
 '''
 import numpy as np
 from qpsolvers import solve_qp
-from scipy.sparse import csc_matrix
+from scipy.sparse import csc_matrix, eye as sparse_eye, issparse
 from bipartitepandas.util import to_list
 
 class QPConstrained:
@@ -186,6 +186,12 @@ class QPConstrained:
                 self.G = csc_matrix(self.G)
             if (self.A.shape[0] > 0) and not isinstance(self.A, csc_matrix):
                 self.A = csc_matrix(self.A)
+
+        # Add small regularization to ensure positive definiteness
+        if issparse(P):
+            P = P + 1e-12 * sparse_eye(P.shape[0], format='csc')
+        else:
+            P = P + 1e-12 * np.eye(P.shape[0])
 
         if self.G.shape[0] > 0 and self.A.shape[0] > 0:
             self.res = solve_qp(P=P, q=q, G=self.G, h=self.h, A=self.A, b=self.b, solver=solver, verbose=verbose, **kwargs)

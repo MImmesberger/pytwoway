@@ -325,8 +325,8 @@ def test_fe_controls_novar():
         'nl': nl,
         'nk': nk,
         'firm_size': 40,
-        'NNm': np.ones(shape=(nk, nk)).astype(int, copy=False),
-        'NNs': np.ones(shape=nk).astype(int, copy=False),
+        'NNm': np.ones(shape=(nk, nk)).astype(int),
+        'NNs': np.ones(shape=nk).astype(int),
         'mmult': 10, 'smult': 10,
         'a1_sig': 1, 'a2_sig': 1, 's1_low': 0, 's1_high': 0, 's2_low': 0, 's2_high': 0,
         'categorical_controls': {
@@ -460,8 +460,8 @@ def test_fe_controls_var():
         'nl': nl,
         'nk': nk,
         'firm_size': 40,
-        'NNm': np.ones(shape=(nk, nk)).astype(int, copy=False),
-        'NNs': np.ones(shape=nk).astype(int, copy=False),
+        'NNm': np.ones(shape=(nk, nk)).astype(int),
+        'NNs': np.ones(shape=nk).astype(int),
         'mmult': 10, 'smult': 10,
         'a1_sig': 1, 'a2_sig': 1, 's1_low': 1, 's1_high': 1, 's2_low': 1, 's2_high': 1,
         'categorical_controls': {

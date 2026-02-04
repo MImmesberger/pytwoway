@@ -156,7 +156,7 @@ class Attrition:
         del cre_estimator
 
         # Delete time and cluster column(s)
-        bdf = bdf.drop(['t', 'g'], axis=1, inplace=True, allow_optional=True)
+        bdf = bdf.drop(['t', 'g'], axis=1, allow_optional=True)
 
         ## Estimate FE model ##
         fe_estimator = tw.FEEstimator(bdf, fe_params)
@@ -419,7 +419,7 @@ class Attrition:
         x_axis = np.round(100 * self.attrition_how.subset_fractions, xticks_round)
         if np.all(x_axis == x_axis.astype(int)):
             # This is necessary for the boxplots, since they don't automatically convert to integers
-            x_axis = x_axis.astype(int, copy=False)
+            x_axis = x_axis.astype(int)
 
         # Flip along 1st axis so that both increasing and decreasing have the same order
         if np.max(np.diff(self.attrition_how.subset_fractions)) <= 0:

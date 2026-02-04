@@ -208,6 +208,8 @@ class FEControlEstimator:
             params = fecontrol_params()
 
         self.adata = data
+        # Store reference to original dataframe for attaching FE estimates
+        self._original_adata = data
 
         self.params = params
         # Results dictionary
@@ -631,7 +633,7 @@ class FEControlEstimator:
                         if solver in ['bicg', 'qmr']:
                             # These solvers need the preconditioner for AA.T
                             pcdT_operator = spilu(AtDpA.T, **pcd_options).solve
-                    self.preconditioner = LinearOperator(AtDpA.shape, matvec=pcd_operator, rmatvec=pcdT_operator)
+                    self.preconditioner = LinearOperator(AtDpA.shape, matvec=pcd_operator, rmatvec=pcdT_operator, dtype=np.float64)
 
         # Save time variable
         self.last_invert_time = 0
@@ -645,13 +647,13 @@ class FEControlEstimator:
             self.adata.loc[:, 'weighted_y'] = self.Dp * self.Y
             fdata = self.adata.groupby('j')[['weighted_m', 'weighted_y', 'w']].sum()
             fm, fy, fi = fdata.loc[:, 'weighted_m'].to_numpy(), fdata.loc[:, 'weighted_y'].to_numpy(), fdata.loc[:, 'w'].to_numpy()
-            fy /= fi
-            self.adata.drop(['weighted_m', 'weighted_y'], axis=1, inplace=True)
+            fy = fy / fi
+            self.adata = self.adata.drop(['weighted_m', 'weighted_y'], axis=1)
         else:
             self.adata.loc[:, 'worker_m'] = self.worker_m
             fdata = self.adata.groupby('j').agg({'worker_m': 'sum', 'y': 'mean', 'i': 'count'})
             fm, fy, fi = fdata.loc[:, 'worker_m'].to_numpy(), fdata.loc[:, 'y'].to_numpy(), fdata.loc[:, 'i'].to_numpy()
-            self.adata.drop('worker_m', axis=1, inplace=True)
+            self.adata = self.adata.drop('worker_m', axis=1)
         ls = np.linspace(0, 1, 11)
         self.res['mover_quantiles'] = weighted_quantile(fm, ls, fi).tolist()
         self.res['size_quantiles'] = weighted_quantile(fi, ls, fi).tolist()
@@ -761,21 +763,22 @@ class FEControlEstimator:
         psi_hat = gh['psi']
         alpha_hat = gh['alpha']
 
-        # Attach columns
-        self.adata.loc[:, 'psi_hat'] = psi_hat[self.adata.loc[:, 'j']]
-        self.adata.loc[:, 'alpha_hat'] = alpha_hat[self.adata.loc[:, 'i']]
+        # Attach columns to the original dataframe (use _original_adata since self.adata
+        # may have been reassigned by drop() operations)
+        self._original_adata['psi_hat'] = psi_hat[self._original_adata.loc[:, 'j']]
+        self._original_adata['alpha_hat'] = alpha_hat[self._original_adata.loc[:, 'i']]
 
         if self.params['attach_fe_estimates'] == 'all':
             ## Control variables ##
             # Categorical controls #
             for cat_col in self.cat_cols:
-                self.adata.loc[:, f'{cat_col}_hat'] = gh[cat_col][self.adata.loc[:, cat_col]]
+                self._original_adata[f'{cat_col}_hat'] = gh[cat_col][self._original_adata.loc[:, cat_col]]
 
             # Continuous controls #
             for cts_col in self.cts_cols:
-                cts_subcols = to_list(self.adata.col_reference_dict[cts_col])
+                cts_subcols = to_list(self._original_adata.col_reference_dict[cts_col])
                 for cts_subcol in cts_subcols:
-                    self.adata.loc[:, f'{cts_subcol}_hat'] = gh[cts_subcol] * self.adata.loc[:, cts_subcol]
+                    self._original_adata[f'{cts_subcol}_hat'] = gh[cts_subcol] * self._original_adata.loc[:, cts_subcol]
 
     def _estimate_clustered_se(self):
         '''
@@ -1360,7 +1363,7 @@ class FEControlEstimator:
             # Use SciPy sparse iterative solver
             solver = solver_dict[solver_name]
             if solver_name == 'minres':
-                v_out = solver(self.AtDpA, v, M=self.preconditioner, tol=tol)[0]
+                v_out = solver(self.AtDpA, v, M=self.preconditioner, rtol=tol)[0]
             elif solver_name == 'qmr':
                 v_out = solver(self.AtDpA, v, tol=tol, atol=0)[0]
             else:
@@ -1566,7 +1569,7 @@ class FEControlEstimator:
                 # Compute Sii for stayers (divide by weight)
                 Sii_s = self.adata.loc[~worker_m, 'j'].map(Sii_j).to_numpy() / w[~worker_m]
                 # No longer need Sii column or groupby_j
-                self.adata.drop('weighted_Sii', axis=1, inplace=True)
+                self.adata = self.adata.drop('weighted_Sii', axis=1)
                 del groupby_j
             else:
                 ### Unweighted ###
@@ -1577,7 +1580,7 @@ class FEControlEstimator:
                 # Compute Sii for stayers
                 Sii_s = self.adata.loc[~worker_m, 'j'].map(Sii_j).to_numpy()
                 # No longer need Sii column
-                self.adata.drop('Sii', axis=1, inplace=True)
+                self.adata = self.adata.drop('Sii', axis=1)
             # No longer need Sii_j
             del Sii_j
 
