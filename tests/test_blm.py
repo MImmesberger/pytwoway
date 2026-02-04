@@ -54,8 +54,8 @@ def test_blm_monotonic_1():
         'nl': nl,
         'nk': nk,
         'firm_size': 10,
-        'NNm': np.ones(shape=(nk, nk)).astype(int, copy=False),
-        'NNs': np.ones(shape=nk).astype(int, copy=False),
+        'NNm': np.ones(shape=(nk, nk)).astype(int),
+        'NNs': np.ones(shape=nk).astype(int),
         'mmult': 1000, 'smult': 1000,
         'a1_sig': 1, 'a2_sig': 1, 's1_low': 0, 's1_high': 0.01, 's2_low': 0, 's2_high': 0.01,
         'categorical_controls': {
@@ -178,8 +178,8 @@ def test_blm_monotonic_1():
 #         'nl': nl,
 #         'nk': nk,
 #         'firm_size': 10,
-#         'NNm': np.ones(shape=(nk, nk)).astype(int, copy=False),
-#         'NNs': np.ones(shape=nk).astype(int, copy=False),
+#         'NNm': np.ones(shape=(nk, nk)).astype(int),
+#         'NNs': np.ones(shape=nk).astype(int),
 #         'mmult': 1000, 'smult': 1000,
 #         'a1_sig': 1, 'a2_sig': 1, 's1_low': 0, 's1_high': 0.01, 's2_low': 0, 's2_high': 0.01,
 #         'categorical_controls': {

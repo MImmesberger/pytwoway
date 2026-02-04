@@ -328,8 +328,8 @@ def _simulate_types_wages(jdata, sdata, gj, gs, blm_model, reallocate=False, rea
     controls_dict, cat_cols, cts_cols = blm_model.controls_dict, blm_model.cat_cols, blm_model.cts_cols
 
     # Correct datatype for gj and gs
-    gj = gj.astype(int, copy=False)
-    gs = gs.astype(int, copy=False)
+    gj = gj.astype(int)
+    gs = gs.astype(int)
 
     # Unpack weights
     if wj is None:
@@ -1304,8 +1304,8 @@ class BLMModel:
         # Store wage outcomes and groups
         Y1 = jdata.loc[:, 'y1'].to_numpy()
         Y2 = jdata.loc[:, 'y2'].to_numpy()
-        G1 = jdata.loc[:, 'g1'].to_numpy().astype(int, copy=False)
-        G2 = jdata.loc[:, 'g2'].to_numpy().astype(int, copy=False)
+        G1 = jdata.loc[:, 'g1'].to_numpy().astype(int)
+        G2 = jdata.loc[:, 'g2'].to_numpy().astype(int)
         # Weights
         if params['weighted'] and jdata._col_included('w'):
             W1 = jdata.loc[:, 'w1'].to_numpy()
@@ -1333,8 +1333,8 @@ class BLMModel:
                 raise NotImplementedError(f'Column names must have either one or two associated subcolumns, but {col!r} has {n_subcols!r} associated subcolumns.')
             if i < len(cat_cols):
                 # Categorical
-                C1[col] = jdata.loc[:, subcol_1].to_numpy().astype(int, copy=False)
-                C2[col] = jdata.loc[:, subcol_2].to_numpy().astype(int, copy=False)
+                C1[col] = jdata.loc[:, subcol_1].to_numpy().astype(int)
+                C2[col] = jdata.loc[:, subcol_2].to_numpy().astype(int)
             else:
                 # Continuous
                 C1[col] = jdata.loc[:, subcol_1].to_numpy()
@@ -1965,8 +1965,8 @@ class BLMModel:
         # Store wage outcomes and groups
         Y1 = sdata['y1'].to_numpy()
         # Y2 = sdata['y2'].to_numpy()
-        G1 = sdata['g1'].to_numpy().astype(int, copy=False)
-        # G2 = sdata['g2'].to_numpy().astype(int, copy=False)
+        G1 = sdata['g1'].to_numpy().astype(int)
+        # G2 = sdata['g2'].to_numpy().astype(int)
 
         # Weights
         if params['weighted'] and sdata._col_included('w'):
@@ -1996,8 +1996,8 @@ class BLMModel:
                     raise NotImplementedError(f'Column names must have either one or two associated subcolumns, but {col!r} has {n_subcols!r} associated subcolumns.')
                 if i < len(cat_cols):
                     # Categorical
-                    C1[col] = sdata.loc[:, subcol_1].to_numpy().astype(int, copy=False)
-                    C2[col] = sdata.loc[:, subcol_2].to_numpy().astype(int, copy=False)
+                    C1[col] = sdata.loc[:, subcol_1].to_numpy().astype(int)
+                    C2[col] = sdata.loc[:, subcol_2].to_numpy().astype(int)
                 else:
                     # Continuous
                     C1[col] = sdata.loc[:, subcol_1].to_numpy()
@@ -2086,7 +2086,7 @@ class BLMModel:
         # Update NNs
         if compute_NNs:
             NNs = sdata['g1'].value_counts(sort=False)
-            NNs.sort_index(inplace=True)
+            NNs = NNs.sort_index()
             self.NNs = NNs.to_numpy()
 
     def fit_movers_cstr_uncstr(self, jdata, compute_NNm=True):
@@ -2905,8 +2905,8 @@ class BLMVarianceDecomposition:
 
         # Drop time column
         if tj:
-            jdata = jdata.drop('t', axis=1, inplace=True, allow_optional=True)
+            jdata = jdata.drop('t', axis=1, allow_optional=True)
         if ts:
-            sdata = sdata.drop('t', axis=1, inplace=True, allow_optional=True)
+            sdata = sdata.drop('t', axis=1, allow_optional=True)
 
         self.res = res

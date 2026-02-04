@@ -348,15 +348,15 @@ class CREEstimator:
         dm = pd.merge(dm, dm2c, on=['j2', 'g1'])
 
         # Create leaveout means
-        ds.eval('y1s_lo = (nsj * y1sj - y1n) / (nsj - 1)', inplace=True)
+        ds = ds.eval('y1s_lo = (nsj * y1sj - y1n) / (nsj - 1)')
         # For each observation we remove from the mean value, all movers that move the
         # same cluster, this includes the individuals himself, as well as workers that move
         # to or from the same firm (we want to not use joint moves as the psi in the other period would be the same
         # and hence would be corrolated)
-        dm.eval('y1m1j_lo = (nm1j * y1m1j - nm1c * y1m1c) / (nm1j - nm1c)', inplace=True)
-        dm.eval('y2m1j_lo = (nm1j * y2m1j - nm1c * y2m1c) / (nm1j - nm1c)', inplace=True)
-        dm.eval('y1m2j_lo = (nm2j * y1m2j - nm2c * y1m2c) / (nm2j - nm2c)', inplace=True)
-        dm.eval('y2m2j_lo = (nm2j * y2m2j - nm2c * y2m2c) / (nm2j - nm2c)', inplace=True)
+        dm = dm.eval('y1m1j_lo = (nm1j * y1m1j - nm1c * y1m1c) / (nm1j - nm1c)')
+        dm = dm.eval('y2m1j_lo = (nm1j * y2m1j - nm1c * y2m1c) / (nm1j - nm1c)')
+        dm = dm.eval('y1m2j_lo = (nm2j * y1m2j - nm2c * y1m2c) / (nm2j - nm2c)')
+        dm = dm.eval('y2m2j_lo = (nm2j * y2m2j - nm2c * y2m2c) / (nm2j - nm2c)')
 
         # Compute the moments involving stayers
         res['y1s_y1s'] = ds.query('nsj > 1').pipe(_pipe_qcov, 'y1n', 'y1s_lo')

@@ -745,8 +745,8 @@ class SimBLM:
 
         # Sort columns
         sorted_cols = _sort_cols(jdata.columns)
-        jdata = jdata.reindex(sorted_cols, axis=1, copy=False)
-        sdata = sdata.reindex(sorted_cols, axis=1, copy=False)
+        jdata = jdata.reindex(sorted_cols, axis=1)
+        sdata = sdata.reindex(sorted_cols, axis=1)
 
         # Convert into BipartiteDataFrame
         jdata = BipartiteDataFrame(jdata, custom_dtype_dict={col: 'categorical' for col in self.cat_cols + ['l']}, custom_how_collapse_dict={col: 'first' for col in self.cat_cols + ['l']}, custom_long_es_split_dict={'l': False})

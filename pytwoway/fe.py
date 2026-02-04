@@ -557,12 +557,12 @@ class FEEstimator:
             fdata = self.adata.groupby('j')[['weighted_m', 'weighted_y', 'w']].sum()
             fm, fy, fi = fdata.loc[:, 'weighted_m'].to_numpy(), fdata.loc[:, 'weighted_y'].to_numpy(), fdata.loc[:, 'w'].to_numpy()
             fy /= fi
-            self.adata.drop(['weighted_m', 'weighted_y'], axis=1, inplace=True)
+            self.adata = self.adata.drop(['weighted_m', 'weighted_y'], axis=1)
         else:
             self.adata.loc[:, 'worker_m'] = self.worker_m
             fdata = self.adata.groupby('j').agg({'worker_m': 'sum', 'y': 'mean', 'i': 'count'})
             fm, fy, fi = fdata.loc[:, 'worker_m'].to_numpy(), fdata.loc[:, 'y'].to_numpy(), fdata.loc[:, 'i'].to_numpy()
-            self.adata.drop('worker_m', axis=1, inplace=True)
+            self.adata = self.adata.drop('worker_m', axis=1)
         ls = np.linspace(0, 1, 11)
         self.res['mover_quantiles'] = weighted_quantile(fm, ls, fi).tolist()
         self.res['size_quantiles'] = weighted_quantile(fi, ls, fi).tolist()
@@ -1658,7 +1658,7 @@ class FEEstimator:
                 # Compute Sii for stayers (divide by weight)
                 Sii_s = self.adata.loc[~worker_m, 'j'].map(Sii_j).to_numpy() / w[~worker_m]
                 # No longer need Sii column or groupby_j
-                self.adata.drop('weighted_Sii', axis=1, inplace=True)
+                self.adata = self.adata.drop('weighted_Sii', axis=1)
                 del groupby_j
             else:
                 ### Unweighted ###
@@ -1669,7 +1669,7 @@ class FEEstimator:
                 # Compute Sii for stayers
                 Sii_s = self.adata.loc[~worker_m, 'j'].map(Sii_j).to_numpy()
                 # No longer need Sii column
-                self.adata.drop('Sii', axis=1, inplace=True)
+                self.adata = self.adata.drop('Sii', axis=1)
             # No longer need Sii_j
             del Sii_j
 

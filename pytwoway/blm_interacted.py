@@ -154,10 +154,10 @@ class InteractedBLMEstimator():
                 jdata.loc[:, 'alpha_j1_j2'] *= jdata.loc[:, 'w'].to_numpy()
                 groupby_j = jdata.groupby(['j1', 'j2'])
                 alpha_j1_j2 = groupby_j['alpha_j1_j2'].sum() / groupby_j['w'].sum()
-                jdata.drop('w', axis=1, inplace=True)
+                jdata = jdata.drop('w', axis=1)
             else:
                 alpha_j1_j2 = jdata.groupby(['j1', 'j2'])['alpha_j1_j2'].mean()
-            jdata.drop('alpha_j1_j2', axis=1, inplace=True)
+            jdata = jdata.drop('alpha_j1_j2', axis=1)
 
             # NOTE: is it correct to multiply by (1 / 2) here?
             alpha_j1_j2 = (1 / 2) * alpha_j1_j2.unstack(fill_value=0).to_numpy()
@@ -175,10 +175,10 @@ class InteractedBLMEstimator():
                 sdata.loc[:, 'alpha_j'] *= sdata.loc[:, 'w'].to_numpy()
                 groupby_j = sdata.groupby('j1')
                 alpha_j = groupby_j['alpha_j'].sum() / groupby_j['w'].sum()
-                sdata.drop('w', axis=1, inplace=True)
+                sdata = sdata.drop('w', axis=1)
             else:
                 alpha_j = sdata.groupby('j1')['alpha_j'].mean()
-            sdata.drop('alpha_j', axis=1, inplace=True)
+            sdata = sdata.drop('alpha_j', axis=1)
 
             # NOTE: is it correct to multiply by (1 / 2) here?
             alpha_j = (1 / 2) * alpha_j.to_numpy()
@@ -281,7 +281,7 @@ class InteractedBLMEstimator():
             if instrument == 'firm_pairs':
                 ## Firm 1 ##
                 # Joint firm indicator
-                J2_KK = (J2 / coarse).astype(int, copy=False)
+                J2_KK = (J2 / coarse).astype(int)
                 KK1 = J1 + nf * J2_KK
 
                 # Transition probability matrix (in this case, matrix of instruments (j1, j2))
@@ -289,7 +289,7 @@ class InteractedBLMEstimator():
 
                 ## Firm 2 ##
                 # Joint firm indicator
-                J1_KK = (J1 / coarse).astype(int, copy=False)
+                J1_KK = (J1 / coarse).astype(int)
                 KK2 = J2 + nf * J1_KK
 
                 # Transition probability matrix (in this case, matrix of instruments (j1, j2))
@@ -298,7 +298,7 @@ class InteractedBLMEstimator():
                 ## Combine ##
                 ZZ = hstack([JJ12_1, JJ12_2])
             elif instrument == 'worker_ids':
-                WW_KK = (WW / coarse).astype(int, copy=False)
+                WW_KK = (WW / coarse).astype(int)
                 ZZ = csc_matrix((np.ones(ni), (range(ni), WW_KK)), shape=(ni, np.max(WW_KK) + 1))
 
         if instrument == 'firm_pairs':
@@ -554,11 +554,11 @@ class InteractedBLMEstimator():
                 if weighted:
                     jdata.loc[:, 'weighted_y'] = jdata.loc[:, 'w'].to_numpy() * jdata.loc[:, 'y'].to_numpy()
                     jdata['mean_y'] = jdata.groupby('i')['weighted_y'].transform('sum') / jdata.groupby('i')['w'].transform('sum')
-                    jdata.drop('weighted_y', axis=1, inplace=True)
+                    jdata = jdata.drop('weighted_y', axis=1)
                 else:
                     jdata['mean_y'] = jdata.groupby('i')['y'].transform('mean')
-                jdata.sort_values('mean_y', inplace=True)
-                jdata.drop('mean_y', axis=1, inplace=True)
+                jdata = jdata.sort_values('mean_y')
+                jdata = jdata.drop('mean_y', axis=1)
 
         # Initial data construction
         nf = jdata.n_firms()

@@ -175,6 +175,6 @@ class SimBS:
         bdf = bdf.clean(cp1).min_joint_obs_frame(is_sorted=True, copy=False).clean(cp2)
 
         # Drop m column
-        bdf = bdf.drop('m', axis=1, inplace=True, allow_optional=True)
+        bdf = bdf.drop('m', axis=1, allow_optional=True)
 
         return bdf

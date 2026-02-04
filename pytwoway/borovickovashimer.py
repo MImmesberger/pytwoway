@@ -123,7 +123,7 @@ class BSEstimator():
             adata.loc[:, 'c_i'] = c_i
 
             ### Firm estimates ###
-            adata.sort_values('j', axis=0, inplace=True)
+            adata = adata.sort_values('j', axis=0)
 
             ## Firm mean ##
             groupby_j = adata.groupby('j', sort=False)
@@ -221,7 +221,7 @@ class BSEstimator():
             adata.loc[:, 'weights_c_i'] = weights_c_i
 
             ### Firm estimates ###
-            adata.sort_values('j', axis=0, inplace=True)
+            adata = adata.sort_values('j', axis=0)
 
             ## Firm mean ##
             groupby_j = adata.groupby('j', sort=False)
@@ -283,12 +283,12 @@ class BSEstimator():
             # Drop columns
             for col in ['unweighted_y', 'sqrt_w']:
                 if col in adata.columns:
-                    adata.drop(col, axis=1, inplace=True)
+                    adata = adata.drop(col, axis=1)
 
         # Drop columns
         for col in ['c_i', 'weighted_c_i', 'weights_c_i']:
             if col in adata.columns:
-                adata.drop(col, axis=1, inplace=True)
+                adata = adata.drop(col, axis=1)
 
         # Sort
         adata.sort_rows(copy=False)
