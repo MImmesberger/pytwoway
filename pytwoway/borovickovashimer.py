@@ -18,7 +18,7 @@ def _compute_mean_sq(col_groupby, col_grouped, weights=None):
         (NumPy Array): computed lambda_i_sq or mu_j_sq
     '''
     with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+        warnings.filterwarnings('ignore', category=DeprecationWarning)
         if weights is None:
             # Split data
             agg_array = np.split(col_grouped, np.unique(col_groupby, return_index=True)[1])[1:] # aggregate(col_groupby, col_grouped, 'array', fill_value=[])

@@ -187,6 +187,8 @@ class FEEstimator:
             params = fe_params()
 
         self.adata = adata
+        # Store reference to original dataframe for attaching FE estimates
+        self._original_adata = adata
 
         self.params = params
         # Results dictionary
@@ -542,7 +544,7 @@ class FEEstimator:
                         if solver in ['bicg', 'qmr']:
                             # These solvers need the preconditioner for M.T
                             pcdT_operator = spilu(Minv.T, **pcd_options).solve
-                    self.preconditioner = LinearOperator(Minv.shape, matvec=pcd_operator, rmatvec=pcdT_operator)
+                    self.preconditioner = LinearOperator(Minv.shape, matvec=pcd_operator, rmatvec=pcdT_operator, dtype=np.float64)
 
         # Save time variable
         self.last_invert_time = 0
@@ -556,7 +558,7 @@ class FEEstimator:
             self.adata.loc[:, 'weighted_y'] = self.Dp * self.Y
             fdata = self.adata.groupby('j')[['weighted_m', 'weighted_y', 'w']].sum()
             fm, fy, fi = fdata.loc[:, 'weighted_m'].to_numpy(), fdata.loc[:, 'weighted_y'].to_numpy(), fdata.loc[:, 'w'].to_numpy()
-            fy /= fi
+            fy = fy / fi
             self.adata = self.adata.drop(['weighted_m', 'weighted_y'], axis=1)
         else:
             self.adata.loc[:, 'worker_m'] = self.worker_m
@@ -613,9 +615,10 @@ class FEEstimator:
         psi_hat = np.append(0, self.psi_hat)
         alpha_hat = self.alpha_hat
 
-        # Attach columns
-        self.adata.loc[:, 'psi_hat'] = psi_hat[self.adata.loc[:, 'j']]
-        self.adata.loc[:, 'alpha_hat'] = alpha_hat[self.adata.loc[:, 'i']]
+        # Attach columns to the original dataframe (use _original_adata since self.adata
+        # may have been reassigned by drop() operations)
+        self._original_adata['psi_hat'] = psi_hat[self._original_adata.loc[:, 'j']]
+        self._original_adata['alpha_hat'] = alpha_hat[self._original_adata.loc[:, 'i']]
 
     def _estimate_sigma_2_fe(self):
         '''
@@ -1359,7 +1362,7 @@ class FEEstimator:
             # Use SciPy sparse iterative solver
             solver = solver_dict[solver_name]
             if solver_name == 'minres':
-                psi_out = solver(self.Minv, psi - self.DwinvWtDpJ.T @ alpha, M=self.preconditioner, tol=tol)[0]
+                psi_out = solver(self.Minv, psi - self.DwinvWtDpJ.T @ alpha, M=self.preconditioner, rtol=tol)[0]
             elif solver_name == 'qmr':
                 psi_out = solver(self.Minv, psi - self.DwinvWtDpJ.T @ alpha, tol=tol, atol=0)[0]
             else:
@@ -1430,8 +1433,8 @@ class FEEstimator:
                 # Use SciPy sparse iterative solver
                 solver = solver_dict[solver_name]
                 if solver_name == 'minres':
-                    M_DpJ_i = solver(self.Minv, DpJ_i, tol=tol)[0]
-                    M_B = solver(self.Minv, self.AA_inv_B @ DpW_i, tol=tol)[0]
+                    M_DpJ_i = solver(self.Minv, DpJ_i, rtol=tol)[0]
+                    M_B = solver(self.Minv, self.AA_inv_B @ DpW_i, rtol=tol)[0]
                 else:
                     M_DpJ_i = solver(self.Minv, DpJ_i, tol=tol, atol=0)[0]
                     M_B = solver(self.Minv, self.AA_inv_B @ DpW_i, tol=tol, atol=0)[0]
