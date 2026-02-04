@@ -2,7 +2,13 @@
 GIT_REMOTE:=$(shell git remote get-url --push origin)
 
 test:
-	poetry run python -m pytest
+	pixi run -e tests tests
+
+test-cov:
+	pixi run -e tests tests-with-cov
+
+lint:
+	pixi run -e tests ty
 
 doc:
 	cp README.rst docs/source/README.rst

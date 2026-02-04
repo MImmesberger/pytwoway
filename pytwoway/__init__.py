@@ -17,3 +17,8 @@ from .borovickovashimer import BSEstimator
 from .simbs import sim_bs_params, SimBS
 from .montecarlo import MonteCarlo
 from .attrition import Attrition
+
+try:
+    from pytwoway._version import __version__
+except ImportError:
+    __version__ = "unknown"
